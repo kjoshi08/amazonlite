@@ -8,65 +8,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build and start services
-        run: |
-          docker compose -f infra/docker-compose.yml up -d --build
-          docker compose -f infra/docker-compose.yml ps
-
-      - name: Show API logs (debug)
-        run: |
-          docker compose -f infra/docker-compose.yml logs --no-color --tail=200 api || true
-
-      - name: Alembic current (sanity)
-        run: |
-          docker compose -f infra/docker-compose.yml exec -T -w /app api alembic current
-
-      - name: Run tests
-        run: |
-          docker compose -f infra/docker-compose.yml exec -T -w /app api pytest -q
-
-      - name: Shutdown
-        if: always()
-        run: |
-          docker compose -f infra/docker-compose.yml down -v
-
-name: CI
-
-on:
-  push:
-    branches: ["main"]
-  pull_request:
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Docker versions
-        run: |
-          docker version
-          docker compose version
-
-  name: CI
-
-on:
-  push:
-    branches: ["main"]
-  pull_request:
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
     timeout-minutes: 20
 
     steps:
@@ -97,12 +38,21 @@ jobs:
             echo "Waiting for API... ($i)"
             sleep 2
           done
+
           echo "API did not become healthy in time"
           docker compose -f infra/docker-compose.yml ps
           docker compose -f infra/docker-compose.yml logs --no-color --tail=300 api
           docker compose -f infra/docker-compose.yml logs --no-color --tail=200 postgres
           docker compose -f infra/docker-compose.yml logs --no-color --tail=200 redis
           exit 1
+
+      - name: Lint (ruff)
+        run: |
+          docker compose -f infra/docker-compose.yml exec -T -w /app api ruff check .
+
+      - name: Format check (black)
+        run: |
+          docker compose -f infra/docker-compose.yml exec -T -w /app api black --check .
 
       - name: Alembic current (sanity)
         run: |
@@ -116,4 +66,3 @@ jobs:
         if: always()
         run: |
           docker compose -f infra/docker-compose.yml down -v
-
