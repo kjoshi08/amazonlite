@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and start services
+        run: |
+          docker compose -f infra/docker-compose.yml up -d --build
+          docker compose -f infra/docker-compose.yml ps
+
+      - name: Show API logs (debug)
+        run: |
+          docker compose -f infra/docker-compose.yml logs --no-color --tail=200 api || true
+
+      - name: Alembic current (sanity)
+        run: |
+          docker compose -f infra/docker-compose.yml exec -T -w /app api alembic current
+
+      - name: Run tests
+        run: |
+          docker compose -f infra/docker-compose.yml exec -T -w /app api pytest -q
+
+      - name: Shutdown
+        if: always()
+        run: |
+          docker compose -f infra/docker-compose.yml down -v
