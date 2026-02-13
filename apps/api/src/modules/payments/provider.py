@@ -1,5 +1,6 @@
 import random
 
+
 # Simulates an external payment gateway
 # In real systems: Stripe/Adyen/etc (network calls, retries, timeouts)
 def authorize(amount_cents: int) -> tuple[bool, str]:

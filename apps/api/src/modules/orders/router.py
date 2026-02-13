@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from src.db.database import get_db
-from src.db.models import Order, OrderItem, Product, OrderStatus
-from src.modules.cart.service import get_cart as get_cart_map, clear_cart
+from src.db.models import Order, OrderItem, OrderStatus, Product
+from src.modules.cart.service import clear_cart
+from src.modules.cart.service import get_cart as get_cart_map
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 

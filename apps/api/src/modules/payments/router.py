@@ -5,8 +5,8 @@ from decimal import Decimal
 from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.orm import Session
 
-from src.db.session import get_db
 from src.db.models import Order, OrderStatus, Payment, PaymentStatus
+from src.db.session import get_db
 
 router = APIRouter(prefix="/payments", tags=["payments"])
 

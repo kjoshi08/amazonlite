@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class PaymentResponse(BaseModel):
     payment_id: int
     order_id: int

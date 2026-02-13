@@ -5,11 +5,11 @@ from src.db.database import get_db
 from src.db.models import Product
 from src.modules.cart.schemas import (
     CartAddItemRequest,
-    CartSetQtyRequest,
     CartItem,
     CartResponse,
+    CartSetQtyRequest,
 )
-from src.modules.cart.service import get_cart, add_item, set_qty, clear_cart
+from src.modules.cart.service import add_item, clear_cart, get_cart, set_qty
 
 router = APIRouter(prefix="/cart", tags=["cart"])
 

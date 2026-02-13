@@ -3,15 +3,15 @@ from __future__ import annotations
 from enum import Enum
 
 from sqlalchemy import (
-    String,
-    DateTime,
     Boolean,
-    Integer,
-    Text,
+    DateTime,
     ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Text,
     UniqueConstraint,
     func,
-    Numeric,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

@@ -1,17 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
 from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 from src.db.database import get_db
 from src.db.models import Product
+from src.db.redis_client import get_redis
+from src.modules.catalog.cache import get_cache_json, set_cache_json
 from src.modules.catalog.schemas import (
     ProductCreate,
-    ProductUpdate,
-    ProductResponse,
     ProductListResponse,
+    ProductResponse,
+    ProductUpdate,
 )
-from src.modules.catalog.cache import get_cache_json, set_cache_json
-from src.db.redis_client import get_redis
 
 router = APIRouter(prefix="/products", tags=["catalog"])
 

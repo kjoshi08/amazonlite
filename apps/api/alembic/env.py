@@ -4,6 +4,7 @@ import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
+
 from alembic import context
 
 # Alembic Config object
@@ -14,8 +15,8 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Import your Base + models so Alembic can autogenerate
-from src.db.base import Base  # noqa: E402
 from src.db import models  # noqa: F401,E402  (ensures models are imported)
+from src.db.base import Base  # noqa: E402
 
 target_metadata = Base.metadata
 
