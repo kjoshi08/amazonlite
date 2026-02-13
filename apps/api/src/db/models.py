@@ -155,7 +155,9 @@ class Payment(Base):
 
     __table_args__ = (
         # Idempotency should be unique PER ORDER (not globally)
-        UniqueConstraint("order_id", "idempotency_key", name="uq_payments_order_id_idempotency_key"),
+        UniqueConstraint(
+            "order_id", "idempotency_key", name="uq_payments_order_id_idempotency_key"
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)

@@ -156,7 +156,9 @@ def cancel_order(order_id: int, user_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Order not found")
 
     if order.status == OrderStatus.PAID.value:
-        raise HTTPException(status_code=400, detail="Paid order cannot be cancelled (refund not implemented)")
+        raise HTTPException(
+            status_code=400, detail="Paid order cannot be cancelled (refund not implemented)"
+        )
     if order.status == OrderStatus.CANCELLED.value:
         return {"detail": "Order already cancelled", "order_id": order.id}
 

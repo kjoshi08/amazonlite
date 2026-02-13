@@ -5,10 +5,14 @@ def test_payment_idempotency_per_order(client, user_id):
     product_id = ensure_product_id(client)
 
     # Create order
-    client.post(f"/cart/items?user_id={user_id}", json={"product_id": product_id, "qty": 1}).raise_for_status()
+    client.post(
+        f"/cart/items?user_id={user_id}", json={"product_id": product_id, "qty": 1}
+    ).raise_for_status()
 
     idem_order = f"order_key_pay_{user_id}"
-    order_resp = client.post(f"/orders/checkout?user_id={user_id}", headers={"Idempotency-Key": idem_order})
+    order_resp = client.post(
+        f"/orders/checkout?user_id={user_id}", headers={"Idempotency-Key": idem_order}
+    )
     order_resp.raise_for_status()
     order = order_resp.json()
     order_id = int(order["id"])
@@ -26,4 +30,7 @@ def test_payment_idempotency_per_order(client, user_id):
     pay2 = p2.json()
 
     assert pay1["payment_id"] == pay2["payment_id"]
-    assert pay2["status"] in ("SUCCEEDED", "FAILED")  # depending on fail_rate default, usually SUCCEEDED
+    assert pay2["status"] in (
+        "SUCCEEDED",
+        "FAILED",
+    )  # depending on fail_rate default, usually SUCCEEDED

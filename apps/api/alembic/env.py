@@ -30,6 +30,7 @@ def get_db_url() -> str:
     # Optional fallback to settings if present
     try:
         from src.core.config import settings  # type: ignore
+
         if hasattr(settings, "DATABASE_URL"):
             return getattr(settings, "DATABASE_URL")
         if hasattr(settings, "database_url"):

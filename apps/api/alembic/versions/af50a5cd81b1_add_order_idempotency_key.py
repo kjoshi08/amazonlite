@@ -4,7 +4,6 @@ Revision ID: af50a5cd81b1
 Revises: 99f5a7f50fa4
 """
 
-
 from alembic import op
 
 revision = "af50a5cd81b1"

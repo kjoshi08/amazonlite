@@ -32,12 +32,7 @@ def list_products(
         query = query.filter((Product.name.ilike(like)) | (Product.sku.ilike(like)))
 
     total = query.with_entities(func.count(Product.id)).scalar() or 0
-    items = (
-        query.order_by(Product.id.desc())
-        .limit(limit)
-        .offset(offset)
-        .all()
-    )
+    items = query.order_by(Product.id.desc()).limit(limit).offset(offset).all()
 
     return ProductListResponse(items=items, limit=limit, offset=offset, total=total)
 
@@ -89,9 +84,30 @@ def update_product(product_id: int, payload: ProductUpdate, db: Session = Depend
 @router.post("/seed", response_model=dict)
 def seed_products(db: Session = Depends(get_db)):
     samples = [
-        {"sku": "AMZL-USB-C-01", "name": "USB-C Cable 1m", "description": "Fast charge USB-C cable", "price_cents": 999, "currency": "USD", "stock_qty": 120},
-        {"sku": "AMZL-MOUSE-02", "name": "Wireless Mouse", "description": "Ergonomic wireless mouse", "price_cents": 2499, "currency": "USD", "stock_qty": 45},
-        {"sku": "AMZL-KB-03", "name": "Mechanical Keyboard", "description": "Compact mechanical keyboard", "price_cents": 6999, "currency": "USD", "stock_qty": 18},
+        {
+            "sku": "AMZL-USB-C-01",
+            "name": "USB-C Cable 1m",
+            "description": "Fast charge USB-C cable",
+            "price_cents": 999,
+            "currency": "USD",
+            "stock_qty": 120,
+        },
+        {
+            "sku": "AMZL-MOUSE-02",
+            "name": "Wireless Mouse",
+            "description": "Ergonomic wireless mouse",
+            "price_cents": 2499,
+            "currency": "USD",
+            "stock_qty": 45,
+        },
+        {
+            "sku": "AMZL-KB-03",
+            "name": "Mechanical Keyboard",
+            "description": "Compact mechanical keyboard",
+            "price_cents": 6999,
+            "currency": "USD",
+            "stock_qty": 18,
+        },
     ]
 
     created = 0

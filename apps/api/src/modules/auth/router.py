@@ -59,17 +59,10 @@ def list_products(
 
     if q:
         like = f"%{q}%"
-        query = query.filter(
-            (Product.name.ilike(like)) | (Product.sku.ilike(like))
-        )
+        query = query.filter((Product.name.ilike(like)) | (Product.sku.ilike(like)))
 
     total = query.with_entities(func.count(Product.id)).scalar() or 0
-    items = (
-        query.order_by(Product.id.desc())
-        .limit(limit)
-        .offset(offset)
-        .all()
-    )
+    items = query.order_by(Product.id.desc()).limit(limit).offset(offset).all()
 
     response = ProductListResponse(
         items=items,

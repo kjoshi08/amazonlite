@@ -15,7 +15,9 @@ router = APIRouter(prefix="/payments", tags=["payments"])
 def pay_order(
     order_id: int,
     db: Session = Depends(get_db),
-    idempotency_key: str | None = Header(default=None, convert_underscores=False, alias="Idempotency-Key"),
+    idempotency_key: str | None = Header(
+        default=None, convert_underscores=False, alias="Idempotency-Key"
+    ),
 ):
     if not idempotency_key:
         raise HTTPException(status_code=400, detail="Idempotency-Key header is required")
