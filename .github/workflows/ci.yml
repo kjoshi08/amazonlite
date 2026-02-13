@@ -48,11 +48,11 @@ jobs:
 
       - name: Lint (ruff)
         run: |
-          docker compose -f infra/docker-compose.yml exec -T -w /app api ruff check .
+          docker compose -f infra/docker-compose.yml exec -T -w /app api sh -lc "pip install -q ruff && ruff check ."
 
       - name: Format check (black)
         run: |
-          docker compose -f infra/docker-compose.yml exec -T -w /app api black --check .
+          docker compose -f infra/docker-compose.yml exec -T -w /app api sh -lc "pip install -q black && black --check ."
 
       - name: Alembic current (sanity)
         run: |
