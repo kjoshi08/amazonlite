@@ -2,13 +2,10 @@
 
 Revision ID: f73111fb6d49
 Revises: af50a5cd81b1
-Create Date: 2026-02-09
 """
 
 from alembic import op
-import sqlalchemy as sa  # noqa: F401
 
-# revision identifiers, used by Alembic.
 revision = "f73111fb6d49"
 down_revision = "af50a5cd81b1"
 branch_labels = None
@@ -16,31 +13,56 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # Drop old global unique constraint on orders.idempotency_key (if it exists)
-    try:
-        op.drop_constraint("orders_idempotency_key_key", "orders", type_="unique")
-    except Exception:
-        pass
+    # ✅ Make safe on fresh DB + existing DB
+    # - Drop old single-column unique (if it exists)
+    # - Create new composite unique (if it doesn't exist)
+    op.execute(
+        """
+        DO $$
+        BEGIN
+          -- Drop old constraint (single-column), only if it exists
+          IF EXISTS (
+            SELECT 1
+            FROM pg_constraint c
+            JOIN pg_class t ON t.oid = c.conrelid
+            WHERE t.relname = 'orders'
+              AND c.conname = 'orders_idempotency_key_key'
+          ) THEN
+            ALTER TABLE orders DROP CONSTRAINT orders_idempotency_key_key;
+          END IF;
 
-    # Create composite unique constraint (user_id, idempotency_key)
-    op.create_unique_constraint(
-        "uq_orders_user_id_idempotency_key",
-        "orders",
-        ["user_id", "idempotency_key"],
+          -- Create new composite unique constraint, only if it doesn't exist
+          IF NOT EXISTS (
+            SELECT 1
+            FROM pg_constraint c
+            JOIN pg_class t ON t.oid = c.conrelid
+            WHERE t.relname = 'orders'
+              AND c.conname = 'uq_orders_user_id_idempotency_key'
+          ) THEN
+            ALTER TABLE orders
+              ADD CONSTRAINT uq_orders_user_id_idempotency_key
+              UNIQUE (user_id, idempotency_key);
+          END IF;
+        END $$;
+        """
     )
 
 
 def downgrade() -> None:
-    # Drop composite constraint
-    op.drop_constraint(
-        "uq_orders_user_id_idempotency_key",
-        "orders",
-        type_="unique",
-    )
-
-    # Restore old global unique constraint
-    op.create_unique_constraint(
-        "orders_idempotency_key_key",
-        "orders",
-        ["idempotency_key"],
+    # ✅ Safe downgrade: drop composite constraint only if it exists
+    op.execute(
+        """
+        DO $$
+        BEGIN
+          IF EXISTS (
+            SELECT 1
+            FROM pg_constraint c
+            JOIN pg_class t ON t.oid = c.conrelid
+            WHERE t.relname = 'orders'
+              AND c.conname = 'uq_orders_user_id_idempotency_key'
+          ) THEN
+            ALTER TABLE orders DROP CONSTRAINT uq_orders_user_id_idempotency_key;
+          END IF;
+        END $$;
+        """
     )
