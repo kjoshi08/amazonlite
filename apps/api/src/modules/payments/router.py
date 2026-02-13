@@ -43,12 +43,10 @@ def pay_order(
     if order.status == OrderStatus.CANCELLED.value:
         raise HTTPException(status_code=409, detail="Order is cancelled")
 
-    # If already PAID, allow only true idempotency (same key). New key -> conflict.
     if order.status == OrderStatus.PAID.value:
         raise HTTPException(status_code=409, detail="Order is already paid")
 
     # 3) Create payment
-    # DB column is Numeric(10,2). Convert from cents -> dollars.
     amount = (Decimal(order.total_cents) / Decimal("100")).quantize(Decimal("0.01"))
 
     payment = Payment(
