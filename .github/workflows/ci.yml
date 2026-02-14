@@ -48,15 +48,21 @@ jobs:
 
       - name: Lint (ruff)
         run: |
-          docker compose -f infra/docker-compose.yml exec -T -w /app api sh -lc "pip install -q ruff && ruff check ."
+          docker compose -f infra/docker-compose.yml exec -T -w /app api ruff check .
 
       - name: Format check (black)
         run: |
-          docker compose -f infra/docker-compose.yml exec -T -w /app api sh -lc "pip install -q black && black --check ."
+          docker compose -f infra/docker-compose.yml exec -T -w /app api black --check .
 
       - name: Alembic current (sanity)
         run: |
           docker compose -f infra/docker-compose.yml exec -T -w /app api alembic current
+
+      - name: DB migrate + seed (before tests)
+        run: |
+          docker compose -f infra/docker-compose.yml exec -T -w /app api alembic upgrade head
+          curl -fsS -X POST http://localhost:8000/products/seed && echo
+          curl -fsS http://localhost:8000/products >/dev/null
 
       - name: Run tests
         run: |
