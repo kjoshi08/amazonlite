@@ -1,7 +1,7 @@
 """create users
 
 Revision ID: 86b5c7ce1ee2
-Revises: 
+Revises:
 Create Date: 2026-01-25 22:29:27.239916
 
 """
