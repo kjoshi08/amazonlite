@@ -39,16 +39,14 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://amazonlite:amazonlite@postgres:5432/amazonlite
       REDIS_URL: redis://redis:6379/0
-      # Optional, but nice to have
       JWT_SECRET: dev-secret-change-me
       JWT_EXPIRE_MIN: "60"
     ports:
       - "8000:8000"
     volumes:
-      # Mount your API code into the container (so edits reflect immediately)
       - ../apps/api:/app
 
-    # ✅ UPDATED: wait for postgres + redis, then start uvicorn
+    # ✅ wait for deps → start api (NO auto migrations here)
     command:
       - sh
       - -lc
@@ -56,7 +54,9 @@ services:
         python /app/scripts/wait_for_deps.py &&
         uvicorn src.main:app --host 0.0.0.0 --port 8000
 
-    restart: unless-stopped
+    # ✅ stop restart loops while debugging
+    restart: "no"
+
     depends_on:
       postgres:
         condition: service_healthy
