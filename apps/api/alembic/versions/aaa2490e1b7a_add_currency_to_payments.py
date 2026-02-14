@@ -7,6 +7,8 @@ Create Date: 2026-02-13
 
 from __future__ import annotations
 
+import sqlalchemy as sa
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -17,36 +19,12 @@ depends_on: str | None = None
 
 
 def upgrade() -> None:
-    # Add column only if it doesn't already exist
-    op.execute(
-        """
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1
-            FROM information_schema.columns
-            WHERE table_name='payments' AND column_name='currency'
-          ) THEN
-            ALTER TABLE payments
-              ADD COLUMN currency VARCHAR(8) NOT NULL DEFAULT 'USD';
-          END IF;
-        END$$;
-        """
+    op.add_column(
+        "payments",
+        sa.Column("currency", sa.String(length=8), nullable=False, server_default="USD"),
     )
+    op.alter_column("payments", "currency", server_default=None)
 
 
 def downgrade() -> None:
-    op.execute(
-        """
-        DO $$
-        BEGIN
-          IF EXISTS (
-            SELECT 1
-            FROM information_schema.columns
-            WHERE table_name='payments' AND column_name='currency'
-          ) THEN
-            ALTER TABLE payments DROP COLUMN currency;
-          END IF;
-        END$$;
-        """
-    )
+    op.drop_column("payments", "currency")

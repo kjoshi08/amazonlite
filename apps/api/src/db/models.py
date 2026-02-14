@@ -19,9 +19,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.db.base import Base
 
 
-# =========================
-# User model (AUTH)
-# =========================
 class User(Base):
     __tablename__ = "users"
 
@@ -32,9 +29,6 @@ class User(Base):
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
-# =========================
-# Product model (CATALOG)
-# =========================
 class Product(Base):
     __tablename__ = "products"
 
@@ -49,9 +43,6 @@ class Product(Base):
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
-# =========================
-# Orders + Payments Enums
-# =========================
 class OrderStatus(str, Enum):
     CREATED = "CREATED"
     PAID = "PAID"
@@ -64,9 +55,6 @@ class PaymentStatus(str, Enum):
     FAILED = "FAILED"
 
 
-# =========================
-# Order model
-# =========================
 class Order(Base):
     __tablename__ = "orders"
 
@@ -75,8 +63,6 @@ class Order(Base):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
-
-    # Keep user_id as STRING for this project (like u1, u2, etc.)
     user_id: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
 
     status: Mapped[str] = mapped_column(
@@ -88,12 +74,7 @@ class Order(Base):
     total_cents: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     currency: Mapped[str] = mapped_column(String(8), nullable=False, server_default="USD")
 
-    idempotency_key: Mapped[str | None] = mapped_column(
-        String(128),
-        index=True,
-        nullable=True,
-    )
-
+    idempotency_key: Mapped[str | None] = mapped_column(String(128), index=True, nullable=True)
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     items: Mapped[list["OrderItem"]] = relationship(
@@ -111,9 +92,6 @@ class Order(Base):
     )
 
 
-# =========================
-# OrderItem model
-# =========================
 class OrderItem(Base):
     __tablename__ = "order_items"
 
@@ -128,17 +106,14 @@ class OrderItem(Base):
     product_id: Mapped[int] = mapped_column(Integer, nullable=False)
     sku: Mapped[str] = mapped_column(String(64), nullable=False)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
-    qty: Mapped[int] = mapped_column(Integer, nullable=False)
 
+    qty: Mapped[int] = mapped_column(Integer, nullable=False)
     unit_price_cents: Mapped[int] = mapped_column(Integer, nullable=False)
     line_total_cents: Mapped[int] = mapped_column(Integer, nullable=False)
 
     order: Mapped["Order"] = relationship("Order", back_populates="items")
 
 
-# =========================
-# Payment model
-# =========================
 class Payment(Base):
     __tablename__ = "payments"
 
@@ -162,10 +137,7 @@ class Payment(Base):
         server_default=PaymentStatus.PENDING.value,
     )
 
-    # Money stored as dollars (Numeric), computed from order.total_cents in router
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
-
-    # Currency column (we’ll add via migration below)
     currency: Mapped[str] = mapped_column(String(8), nullable=False, server_default="USD")
 
     idempotency_key: Mapped[str | None] = mapped_column(String(128), index=True, nullable=True)
